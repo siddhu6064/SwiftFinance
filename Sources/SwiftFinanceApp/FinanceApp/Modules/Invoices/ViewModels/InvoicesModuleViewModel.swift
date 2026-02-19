@@ -2,48 +2,38 @@ import Foundation
 
 @MainActor
 final class InvoicesModuleViewModel: ObservableObject {
-    @Published private(set) var invoices: [Invoice] = []
-    @Published var isShowingAddInvoice = false
+    @Published var invoices: [InvoiceRow] = []
     @Published var searchText: String = ""
+    @Published var isShowingAddInvoice: Bool = false
 
-    private let repository: InvoiceRepository
+    private let repo: InvoiceRepository
 
-    init(repository: InvoiceRepository = CoreDataInvoiceRepository()) {
-        self.repository = repository
+    init(repo: InvoiceRepository = CoreDataInvoiceRepository()) {
+        self.repo = repo
     }
 
     func load() {
-        invoices = repository.fetchInvoices()
+        do { invoices = try repo.fetchInvoices() }
+        catch { print("Fetch invoices error:", error) }
     }
 
-    // Used by the Table sorting hook in InvoicesView
-    func applySort(_ order: [KeyPathComparator<Invoice>]) {
+    func applySort(_ order: [KeyPathComparator<InvoiceRow>]) {
         invoices.sort(using: order)
     }
 
     func addInvoice(number: String, customer: String, amount: Double, status: String, date: Date) {
-        let invoice = Invoice(
-            id: UUID(),
-            number: number,
-            customerName: customer,
-            issueDate: date,
-            dueDate: date, // you can compute a real due date later
-            totalAmount: Decimal(amount),
-            status: status
-        )
-        repository.createInvoice(invoice)
-        load()
+        let invoice = InvoiceRow(id: UUID(), number: number, customer: customer, amount: amount, status: status, date: date)
+        do { try repo.createInvoice(invoice); load() }
+        catch { print("Create invoice error:", error) }
     }
 
-    // Used by EditInvoiceSheet
-    func updateInvoice(_ invoice: Invoice) {
-        repository.updateInvoice(invoice)
-        load()
+    func updateInvoice(_ invoice: InvoiceRow) {
+        do { try repo.updateInvoice(invoice); load() }
+        catch { print("Update invoice error:", error) }
     }
 
-    // Used by context menu / Delete key
-    func deleteInvoice(_ invoice: Invoice) {
-        repository.deleteInvoice(id: invoice.id)
-        load()
+    func deleteInvoice(_ invoice: InvoiceRow) {
+        do { try repo.deleteInvoice(id: invoice.id); load() }
+        catch { print("Delete invoice error:", error) }
     }
 }

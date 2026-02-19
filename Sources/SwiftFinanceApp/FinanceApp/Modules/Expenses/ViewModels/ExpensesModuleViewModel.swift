@@ -2,47 +2,38 @@ import Foundation
 
 @MainActor
 final class ExpensesModuleViewModel: ObservableObject {
-    @Published private(set) var expenses: [Expense] = []
-    @Published var isShowingAddExpense: Bool = false
+    @Published var expenses: [ExpenseRow] = []
     @Published var searchText: String = ""
+    @Published var isShowingAddExpense: Bool = false
 
-    private let repository: ExpenseRepository
+    private let repo: ExpenseRepository
 
-    init(repository: ExpenseRepository = CoreDataExpenseRepository()) {
-        self.repository = repository
+    init(repo: ExpenseRepository = CoreDataExpenseRepository()) {
+        self.repo = repo
     }
 
     func load() {
-        expenses = repository.fetchExpenses()
+        do { expenses = try repo.fetchExpenses() }
+        catch { print("Fetch expenses error:", error) }
     }
 
-    // Used by the Table sorting hook in ExpensesView
-    func applySort(_ order: [KeyPathComparator<Expense>]) {
+    func applySort(_ order: [KeyPathComparator<ExpenseRow>]) {
         expenses.sort(using: order)
     }
 
     func addExpense(vendor: String, category: String, amount: Double, date: Date) {
-        let expense = Expense(
-            id: UUID(),
-            vendorName: vendor,
-            category: category,
-            amount: Decimal(amount),
-            incurredAt: date,
-            reimbursable: false
-        )
-        repository.createExpense(expense)
-        load()
+        let expense = ExpenseRow(id: UUID(), vendor: vendor, category: category, amount: amount, date: date)
+        do { try repo.createExpense(expense); load() }
+        catch { print("Create expense error:", error) }
     }
 
-    // Used by EditExpenseSheet
-    func updateExpense(_ expense: Expense) {
-        repository.updateExpense(expense)
-        load()
+    func updateExpense(_ expense: ExpenseRow) {
+        do { try repo.updateExpense(expense); load() }
+        catch { print("Update expense error:", error) }
     }
 
-    // Used by context menu / Delete key
-    func deleteExpense(_ expense: Expense) {
-        repository.deleteExpense(id: expense.id)
-        load()
+    func deleteExpense(_ expense: ExpenseRow) {
+        do { try repo.deleteExpense(id: expense.id); load() }
+        catch { print("Delete expense error:", error) }
     }
 }
