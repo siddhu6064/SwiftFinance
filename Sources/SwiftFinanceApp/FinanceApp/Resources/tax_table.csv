@@ -1,0 +1,3 @@
+region,tax_name,rate
+US-FED,FICA,0.0765
+US-CA,StateWithholding,0.06
