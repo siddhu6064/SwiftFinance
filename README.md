@@ -1,6 +1,6 @@
 # NuatisFinance
 
-SwiftFinance is a macOS-first finance management app with an enterprise UI language inspired by QuickBooks, ADP payroll systems, and modern fintech SaaS dashboards.
+NuatisFinance is a macOS-first finance management app with an enterprise UI language inspired by QuickBooks, ADP payroll systems, and modern fintech SaaS dashboards.
 
 ## Implemented UI architecture
 - Fixed-width left navigation (240px)
