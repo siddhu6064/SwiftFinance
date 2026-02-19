@@ -4,6 +4,8 @@ import CoreData
 protocol InvoiceRepository {
     func fetchInvoices() -> [Invoice]
     func createInvoice(_ invoice: Invoice)
+    func updateInvoice(_ invoice: Invoice)
+    func deleteInvoice(id: UUID)
 }
 
 struct CoreDataInvoiceRepository: InvoiceRepository {
@@ -42,6 +44,33 @@ struct CoreDataInvoiceRepository: InvoiceRepository {
         obj.setValue(invoice.dueDate, forKey: "dueDate")
         obj.setValue(invoice.totalAmount, forKey: "totalAmount")
         obj.setValue(invoice.status, forKey: "status")
+
+        CoreDataStack.shared.saveIfNeeded()
+    }
+
+    func updateInvoice(_ invoice: Invoice) {
+        let req = NSFetchRequest<NSManagedObject>(entityName: "InvoiceRecord")
+        req.predicate = NSPredicate(format: "id == %@", invoice.id as CVarArg)
+        req.fetchLimit = 1
+
+        guard let obj = (try? context.fetch(req))?.first else { return }
+
+        obj.setValue(invoice.number, forKey: "number")
+        obj.setValue(invoice.customerName, forKey: "customerName")
+        obj.setValue(invoice.issueDate, forKey: "issueDate")
+        obj.setValue(invoice.dueDate, forKey: "dueDate")
+        obj.setValue(invoice.totalAmount, forKey: "totalAmount")
+        obj.setValue(invoice.status, forKey: "status")
+
+        CoreDataStack.shared.saveIfNeeded()
+    }
+
+    func deleteInvoice(id: UUID) {
+        let req = NSFetchRequest<NSManagedObject>(entityName: "InvoiceRecord")
+        req.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        let results = (try? context.fetch(req)) ?? []
+        results.forEach { context.delete($0) }
 
         CoreDataStack.shared.saveIfNeeded()
     }

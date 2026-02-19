@@ -4,6 +4,8 @@ import CoreData
 protocol ExpenseRepository {
     func fetchExpenses() -> [Expense]
     func createExpense(_ expense: Expense)
+    func updateExpense(_ expense: Expense)
+    func deleteExpense(id: UUID)
 }
 
 struct CoreDataExpenseRepository: ExpenseRepository {
@@ -40,6 +42,32 @@ struct CoreDataExpenseRepository: ExpenseRepository {
         obj.setValue(expense.amount, forKey: "amount")
         obj.setValue(expense.incurredAt, forKey: "incurredAt")
         obj.setValue(expense.reimbursable, forKey: "reimbursable")
+
+        CoreDataStack.shared.saveIfNeeded()
+    }
+
+    func updateExpense(_ expense: Expense) {
+        let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
+        req.predicate = NSPredicate(format: "id == %@", expense.id as CVarArg)
+        req.fetchLimit = 1
+
+        guard let obj = (try? context.fetch(req))?.first else { return }
+
+        obj.setValue(expense.vendorName, forKey: "vendorName")
+        obj.setValue(expense.category, forKey: "category")
+        obj.setValue(expense.amount, forKey: "amount")
+        obj.setValue(expense.incurredAt, forKey: "incurredAt")
+        obj.setValue(expense.reimbursable, forKey: "reimbursable")
+
+        CoreDataStack.shared.saveIfNeeded()
+    }
+
+    func deleteExpense(id: UUID) {
+        let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
+        req.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+
+        let results = (try? context.fetch(req)) ?? []
+        results.forEach { context.delete($0) }
 
         CoreDataStack.shared.saveIfNeeded()
     }
