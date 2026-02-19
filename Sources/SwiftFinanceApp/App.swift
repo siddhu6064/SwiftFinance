@@ -2,11 +2,13 @@ import SwiftUI
 
 @main
 struct FinanceApp: App {
+    private let coreData = CoreDataStack.shared
+
     var body: some Scene {
         WindowGroup {
             MainWindow()
-                .frame(minWidth: 1280, minHeight: 820)
+                .environment(\.managedObjectContext, coreData.container.viewContext)
         }
-        .windowResizability(.contentSize)
+        .windowResizability(.automatic) // better for finance apps
     }
 }
