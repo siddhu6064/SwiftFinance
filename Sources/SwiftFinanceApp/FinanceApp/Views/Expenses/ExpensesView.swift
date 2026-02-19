@@ -2,21 +2,25 @@ import SwiftUI
 
 struct ExpensesView: View {
     @StateObject private var vm = ExpensesModuleViewModel()
+
     @State private var selection = Set<UUID>()
-
-    @State private var sortOrder: [KeyPathComparator<ExpenseRow>] = [
-        .init(\.date, order: .reverse)
+    @State private var sortOrder: [KeyPathComparator<Expense>] = [
+        .init(\.incurredAt, order: .reverse)
     ]
+    @State private var editingExpense: Expense? = nil
 
-    @State private var editingExpense: ExpenseRow? = nil
-
-    var filtered: [ExpenseRow] {
+    private var filtered: [Expense] {
         let q = vm.searchText.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if q.isEmpty { return vm.expenses }
         return vm.expenses.filter {
-            $0.vendor.lowercased().contains(q) ||
+            $0.vendorName.lowercased().contains(q) ||
             $0.category.lowercased().contains(q)
         }
+    }
+
+    private var selectedExpense: Expense? {
+        guard selection.count == 1, let id = selection.first else { return nil }
+        return vm.expenses.first(where: { $0.id == id })
     }
 
     var body: some View {
@@ -35,9 +39,8 @@ struct ExpensesView: View {
             }
 
             Table(filtered, selection: $selection, sortOrder: $sortOrder) {
-
-                TableColumn("Vendor", value: \.vendor) { row in
-                    Text(row.vendor)
+                TableColumn("Vendor", value: \.vendorName) { row in
+                    Text(row.vendorName)
                         .onTapGesture(count: 2) { editingExpense = row }
                 }
                 .width(min: 140, ideal: 240, max: 420)
@@ -52,13 +55,13 @@ struct ExpensesView: View {
                     Text(row.amount, format: .currency(code: "USD"))
                         .onTapGesture(count: 2) { editingExpense = row }
                 }
-                .width(min: 90, ideal: 120, max: 160)
+                .width(min: 90, ideal: 120, max: 180)
 
-                TableColumn("Date", value: \.date) { row in
-                    Text(row.date, format: .dateTime.month().day().year())
+                TableColumn("Date", value: \.incurredAt) { row in
+                    Text(row.incurredAt, format: .dateTime.month().day().year())
                         .onTapGesture(count: 2) { editingExpense = row }
                 }
-                .width(min: 110, ideal: 140, max: 180)
+                .width(min: 120, ideal: 150, max: 200)
             }
             .onChange(of: sortOrder) { _, newOrder in
                 vm.applySort(newOrder)
@@ -81,6 +84,33 @@ struct ExpensesView: View {
                 }
                 .keyboardShortcut(.delete, modifiers: [])
             }
+            .toolbar {
+                ToolbarItemGroup {
+                    Button {
+                        vm.isShowingAddExpense = true
+                    } label: {
+                        Label("Add", systemImage: "plus")
+                    }
+                    .keyboardShortcut("=", modifiers: [.command]) // quick entry Cmd+=
+
+                    Button {
+                        if let exp = selectedExpense { editingExpense = exp }
+                    } label: {
+                        Label("Edit", systemImage: "pencil")
+                    }
+                    .disabled(selectedExpense == nil)
+
+                    Button(role: .destructive) {
+                        let ids = selection
+                        let toDelete = vm.expenses.filter { ids.contains($0.id) }
+                        toDelete.forEach { vm.deleteExpense($0) }
+                        selection.removeAll()
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                    .disabled(selection.isEmpty)
+                }
+            }
 
             if filtered.isEmpty {
                 ContentUnavailableView(
@@ -93,13 +123,9 @@ struct ExpensesView: View {
         }
         .padding(16)
         .onAppear { vm.load() }
-
-        // Add sheet
         .sheet(isPresented: $vm.isShowingAddExpense) {
             AddExpenseSheet(vm: vm)
         }
-
-        // Edit sheet (double-click / context menu)
         .sheet(item: $editingExpense) { expense in
             EditExpenseSheet(vm: vm, expense: expense)
         }

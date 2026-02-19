@@ -4,22 +4,24 @@ struct EditInvoiceSheet: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var vm: InvoicesModuleViewModel
 
-    let invoice: InvoiceRow
+    let invoice: Invoice
 
     @State private var number: String
-    @State private var customer: String
+    @State private var customerName: String
     @State private var amountText: String
     @State private var status: String
-    @State private var date: Date
+    @State private var issueDate: Date
+    @State private var dueDate: Date
 
-    init(vm: InvoicesModuleViewModel, invoice: InvoiceRow) {
+    init(vm: InvoicesModuleViewModel, invoice: Invoice) {
         self.vm = vm
         self.invoice = invoice
         _number = State(initialValue: invoice.number)
-        _customer = State(initialValue: invoice.customer)
-        _amountText = State(initialValue: String(invoice.amount))
+        _customerName = State(initialValue: invoice.customerName)
+        _amountText = State(initialValue: "\(invoice.totalAmount)")
         _status = State(initialValue: invoice.status)
-        _date = State(initialValue: invoice.date)
+        _issueDate = State(initialValue: invoice.issueDate)
+        _dueDate = State(initialValue: invoice.dueDate)
     }
 
     private let statuses = ["Draft", "Sent", "Paid", "Overdue"]
@@ -30,31 +32,39 @@ struct EditInvoiceSheet: View {
 
             Form {
                 TextField("Invoice #", text: $number)
-                TextField("Customer", text: $customer)
+                TextField("Customer", text: $customerName)
                 TextField("Amount", text: $amountText)
 
                 Picker("Status", selection: $status) {
                     ForEach(statuses, id: \.self) { Text($0) }
                 }
 
-                DatePicker("Date", selection: $date, displayedComponents: [.date])
+                DatePicker("Issue Date", selection: $issueDate, displayedComponents: [.date])
+                DatePicker("Due Date", selection: $dueDate, displayedComponents: [.date])
             }
 
             HStack {
                 Spacer()
                 Button("Cancel") { dismiss() }
                 Button("Save") {
-                    let amount = Double(amountText) ?? invoice.amount
-                    vm.updateInvoice(
-                        InvoiceRow(id: invoice.id, number: number, customer: customer, amount: amount, status: status, date: date)
+                    let amount = Decimal(string: amountText) ?? invoice.totalAmount
+                    let updated = Invoice(
+                        id: invoice.id,
+                        number: number,
+                        customerName: customerName,
+                        issueDate: issueDate,
+                        dueDate: dueDate,
+                        totalAmount: amount,
+                        status: status
                     )
+                    vm.updateInvoice(updated)
                     dismiss()
                 }
                 .buttonStyle(.borderedProminent)
-                .disabled(number.isEmpty || customer.isEmpty)
+                .disabled(number.isEmpty || customerName.isEmpty)
             }
         }
         .padding(16)
-        .frame(width: 420)
+        .frame(width: 460)
     }
 }

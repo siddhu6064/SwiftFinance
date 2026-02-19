@@ -17,7 +17,7 @@ final class ExpensesModuleViewModel: ObservableObject {
         catch { print("Fetch expenses error:", error) }
     }
 
-    func applySort(_ order: [KeyPathComparator<ExpenseRow>]) {
+    func applySort(_ order: [KeyPathComparator<Expense>]) {
         expenses.sort(using: order)
     }
 

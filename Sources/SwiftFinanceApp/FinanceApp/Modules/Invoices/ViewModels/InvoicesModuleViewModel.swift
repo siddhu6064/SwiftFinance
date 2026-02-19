@@ -17,7 +17,7 @@ final class InvoicesModuleViewModel: ObservableObject {
         catch { print("Fetch invoices error:", error) }
     }
 
-    func applySort(_ order: [KeyPathComparator<InvoiceRow>]) {
+    func applySort(_ order: [KeyPathComparator<Invoice>]) {
         invoices.sort(using: order)
     }
 
