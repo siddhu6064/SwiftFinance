@@ -9,6 +9,6 @@ struct FinanceApp: App {
             MainWindow()
                 .environment(\.managedObjectContext, coreData.container.viewContext)
         }
-        .windowResizability(.automatic) // better for finance apps
+        .windowResizability(.automatic)
     }
 }

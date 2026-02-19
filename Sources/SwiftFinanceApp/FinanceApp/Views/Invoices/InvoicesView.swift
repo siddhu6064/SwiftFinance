@@ -25,6 +25,7 @@ struct InvoicesView: View {
 
                 Button("New Invoice") { vm.isShowingAddInvoice = true }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut("n", modifiers: [.command]) // ✅ added
             }
 
             Table(filtered, selection: $selection) {
@@ -36,10 +37,20 @@ struct InvoicesView: View {
             }
             .contextMenu(forSelectionType: UUID.self) { ids in
                 Button("Delete") {
+                    guard !ids.isEmpty else { return } // ✅ added
                     let toDelete = vm.invoices.filter { ids.contains($0.id) }
                     toDelete.forEach { vm.deleteInvoice($0) }
                     selection.removeAll()
                 }
+            }
+
+            if filtered.isEmpty { // ✅ added
+                ContentUnavailableView(
+                    "No invoices yet",
+                    systemImage: "doc.text",
+                    description: Text("Click “New Invoice” to create your first invoice.")
+                )
+                .padding(.top, 8)
             }
         }
         .padding(16)

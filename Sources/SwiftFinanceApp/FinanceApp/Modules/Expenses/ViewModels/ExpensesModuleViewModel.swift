@@ -2,37 +2,29 @@ import Foundation
 
 @MainActor
 final class ExpensesModuleViewModel: ObservableObject {
-    @Published var expenses: [ExpenseRow] = []
-    @Published var searchText: String = ""
-    @Published var isShowingAddExpense: Bool = false
+    @Published private(set) var expenses: [Expense] = []
+    @Published var isShowingAddExpense = false
 
-    private let repo: ExpenseRepository
+    private let repository: ExpenseRepository
 
-    init(repo: ExpenseRepository = CoreDataExpenseRepository()) {
-        self.repo = repo
+    init(repository: ExpenseRepository = CoreDataExpenseRepository()) {
+        self.repository = repository
     }
 
     func load() {
-        do { expenses = try repo.fetchExpenses() }
-        catch { print("Fetch expenses error:", error) }
+        expenses = repository.fetchExpenses()
     }
 
     func addExpense(vendor: String, category: String, amount: Double, date: Date) {
-        let expense = ExpenseRow(id: UUID(), vendor: vendor, category: category, amount: amount, date: date)
-        do {
-            try repo.createExpense(expense)
-            load()
-        } catch {
-            print("Create expense error:", error)
-        }
-    }
-
-    func deleteExpense(_ expense: ExpenseRow) {
-        do {
-            try repo.deleteExpense(id: expense.id)
-            load()
-        } catch {
-            print("Delete expense error:", error)
-        }
+        let expense = Expense(
+            id: UUID(),
+            vendorName: vendor,
+            category: category,
+            amount: Decimal(amount),
+            incurredAt: date,
+            reimbursable: false
+        )
+        repository.createExpense(expense)
+        load()
     }
 }

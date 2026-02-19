@@ -24,6 +24,7 @@ struct ExpensesView: View {
 
                 Button("Add Expense") { vm.isShowingAddExpense = true }
                     .buttonStyle(.borderedProminent)
+                    .keyboardShortcut("e", modifiers: [.command]) // ✅ added
             }
 
             Table(filtered, selection: $selection) {
@@ -34,10 +35,20 @@ struct ExpensesView: View {
             }
             .contextMenu(forSelectionType: UUID.self) { ids in
                 Button("Delete") {
+                    guard !ids.isEmpty else { return } // ✅ added
                     let toDelete = vm.expenses.filter { ids.contains($0.id) }
                     toDelete.forEach { vm.deleteExpense($0) }
                     selection.removeAll()
                 }
+            }
+
+            if filtered.isEmpty { // ✅ added
+                ContentUnavailableView(
+                    "No expenses yet",
+                    systemImage: "tray",
+                    description: Text("Click “Add Expense” to record your first expense.")
+                )
+                .padding(.top, 8)
             }
         }
         .padding(16)

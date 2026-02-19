@@ -2,71 +2,45 @@ import Foundation
 import CoreData
 
 protocol ExpenseRepository {
-    func fetchExpenses() throws -> [ExpenseRow]
-    func createExpense(_ expense: ExpenseRow) throws
-    func updateExpense(_ expense: ExpenseRow) throws
-    func deleteExpense(id: UUID) throws
+    func fetchExpenses() -> [Expense]
+    func createExpense(_ expense: Expense)
 }
 
-final class CoreDataExpenseRepository: ExpenseRepository {
+struct CoreDataExpenseRepository: ExpenseRepository {
     private let context: NSManagedObjectContext
 
     init(context: NSManagedObjectContext = CoreDataStack.shared.container.viewContext) {
         self.context = context
     }
 
-    func fetchExpenses() throws -> [ExpenseRow] {
-        let request = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
-        request.sortDescriptors = [NSSortDescriptor(key: "date", ascending: false)]
+    func fetchExpenses() -> [Expense] {
+        let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
+        req.sortDescriptors = [NSSortDescriptor(key: "incurredAt", ascending: false)]
 
-        let results = try context.fetch(request)
-
-        return results.map { obj in
-            ExpenseRow(
-                id: (obj.value(forKey: "id") as? UUID) ?? UUID(),
-                vendor: obj.string("vendor"),
-                category: obj.string("category"),
-                amount: obj.double("amount"),
-                date: obj.date("date")
+        let results = (try? context.fetch(req)) ?? []
+        return results.map {
+            Expense(
+                id: ($0.value(forKey: "id") as? UUID) ?? UUID(),
+                vendorName: ($0.value(forKey: "vendorName") as? String) ?? "",
+                category: ($0.value(forKey: "category") as? String) ?? "",
+                amount: ($0.value(forKey: "amount") as? Decimal) ?? 0,
+                incurredAt: ($0.value(forKey: "incurredAt") as? Date) ?? .now,
+                reimbursable: ($0.value(forKey: "reimbursable") as? Bool) ?? false
             )
         }
     }
 
-    func createExpense(_ expense: ExpenseRow) throws {
+    func createExpense(_ expense: Expense) {
         let entity = NSEntityDescription.entity(forEntityName: "ExpenseRecord", in: context)!
         let obj = NSManagedObject(entity: entity, insertInto: context)
 
         obj.setValue(expense.id, forKey: "id")
-        obj.setValue(expense.vendor, forKey: "vendor")
+        obj.setValue(expense.vendorName, forKey: "vendorName")
         obj.setValue(expense.category, forKey: "category")
         obj.setValue(expense.amount, forKey: "amount")
-        obj.setValue(expense.date, forKey: "date")
+        obj.setValue(expense.incurredAt, forKey: "incurredAt")
+        obj.setValue(expense.reimbursable, forKey: "reimbursable")
 
-        try context.save()
-    }
-
-    func updateExpense(_ expense: ExpenseRow) throws {
-        let request = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
-        request.predicate = NSPredicate(format: "id == %@", expense.id as CVarArg)
-        request.fetchLimit = 1
-
-        guard let obj = try context.fetch(request).first else { return }
-
-        obj.setValue(expense.vendor, forKey: "vendor")
-        obj.setValue(expense.category, forKey: "category")
-        obj.setValue(expense.amount, forKey: "amount")
-        obj.setValue(expense.date, forKey: "date")
-
-        try context.save()
-    }
-
-    func deleteExpense(id: UUID) throws {
-        let request = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
-        request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-
-        let results = try context.fetch(request)
-        results.forEach { context.delete($0) }
-
-        try context.save()
+        CoreDataStack.shared.saveIfNeeded()
     }
 }
