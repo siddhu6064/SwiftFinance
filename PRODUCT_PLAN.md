@@ -1,4 +1,4 @@
-# SwiftFinance Product Plan (macOS .dmg + Mac App Store)
+# NuatisFinance Product Plan (macOS .dmg + Mac App Store)
 
 ## Vision
 Build a personal-use, macOS-native finance platform inspired by QuickBooks/ADP that covers:
