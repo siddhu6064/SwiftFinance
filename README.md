@@ -1,59 +1,70 @@
-# NuatisFinance
+# NuatisFinance (macOS)
 
-NuatisFinance is a macOS-first finance management app with an enterprise UI language inspired by QuickBooks, ADP payroll systems, and modern fintech SaaS dashboards.
+NuatisFinance is a macOS finance tracker built with SwiftUI and Core Data.  
+Current focus: clean architecture (Repository pattern), testable data layer, and an Invoice/Expense workflow.
 
-## Implemented UI architecture
-- Fixed-width left navigation (240px)
-- Top enterprise header bar with company selector, global search, quick actions, notifications, and user avatar
-- Centered content canvas with max-width dashboard layout
-- Reusable component system for cards, tables, charts, and sidebar items
-- Native macOS materials, vibrancy, adaptive light/dark support, and subtle transitions
+---
 
-## Primary sections
-- Dashboard
-- Invoices
-- Expenses
-- Income
-- Customers
-- Vendors
-- Payroll
-- Employees
-- Reports
-- Taxes
-- Settings
+## Features (Current)
+- Core Data persistence
+- Repository pattern for data access
+- Invoice model + basic CRUD
+- Unit tests for repository behavior (in-memory Core Data)
 
-## Structure
-```text
-Sources/NuatisFinanceApp/
-├── App.swift
-├── MainWindow.swift
-├── SidebarView.swift
-└── FinanceApp/Views/
-    ├── Components/
-    │   ├── SidebarItem.swift
-    │   ├── HeaderBar.swift
-    │   ├── DashboardCard.swift
-    │   ├── DataTable.swift
-    │   └── ChartCard.swift
-    ├── Shared/AppSection.swift
-    ├── Dashboard/DashboardView.swift
-    ├── Invoices/InvoicesView.swift
-    ├── Expenses/ExpensesView.swift
-    ├── Income/IncomeView.swift
-    ├── Customers/CustomersView.swift
-    ├── Vendors/VendorsView.swift
-    ├── Payroll/PayrollView.swift
-    ├── Employees/EmployeesView.swift
-    ├── Reports/ReportsView.swift
-    ├── Taxes/TaxesView.swift
-    └── Settings/SettingsView.swift
-```
+## Planned
+- Expense tracking
+- Categories / tags
+- Search + filters + sorting
+- CSV export
+- Monthly summary dashboard
 
-See [`PRODUCT_PLAN.md`](./PRODUCT_PLAN.md) for broader product roadmap.
-## Next-step architecture (now added)
-- `FinanceApp/Data/CoreData/CoreDataStack.swift` for shared persistence bootstrap
-- Per-module layering for business flow:
-  - `Modules/<Section>/Repositories/`
-  - `Modules/<Section>/UseCases/`
-  - `Modules/<Section>/ViewModels/`
-- Views now consume module view models instead of static hardcoded rows for invoices, expenses, customers, and vendors.
+---
+
+## Tech Stack
+- **SwiftUI** (macOS)
+- **Core Data**
+- **Swift Package Manager** (SPM) executable target
+- **XCTest** for unit tests
+
+---
+
+## Requirements
+- macOS 14+
+- Xcode 15+ (Swift 5.9)
+- Swift Package Manager (comes with Xcode)
+
+---
+
+## Project Structure
+
+> Paths below match the SwiftPM targets in `Package.swift`.
+
+- `Sources/NuatisFinance/`
+  - `FinanceApp/`  
+    - `Resources/` (assets, Core Data model, etc.)
+    - `App/` (SwiftUI entry + app composition)
+    - `Data/` (Core Data stack, repositories)
+    - `Domain/` (models, repository protocols, use cases)
+    - `UI/` (views + view models)
+- `Tests/NuatisFinanceTests/`
+  - Repository tests (Core Data in-memory)
+  - Test utilities / fixtures
+
+---
+
+## Build & Run (Xcode)
+
+1. Open the repo in Xcode:
+   - File → Open → select the folder containing `Package.swift`
+2. Select scheme **NuatisFinanceApp**
+3. Run (⌘R)
+
+---
+
+## Build & Run (CLI)
+
+From the repo root:
+
+```bash
+swift build
+swift run NuatisFinanceApp
