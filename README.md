@@ -24,7 +24,7 @@ NuatisFinance is a macOS-first finance management app with an enterprise UI lang
 
 ## Structure
 ```text
-Sources/SwiftFinanceApp/
+Sources/NuatisFinanceApp/
 ├── App.swift
 ├── MainWindow.swift
 ├── SidebarView.swift
