@@ -1,4 +1,4 @@
-# SwiftFinance
+# NuatisFinance
 
 SwiftFinance is a macOS-first finance management app with an enterprise UI language inspired by QuickBooks, ADP payroll systems, and modern fintech SaaS dashboards.
 
