@@ -18,7 +18,7 @@ final class CoreDataStack {
         let model = Self.makeModel()
 
         container = NSPersistentContainer(
-            name: "SwiftFinanceModel",
+            name: "NuatisFinanceModel",
             managedObjectModel: model
         )
 

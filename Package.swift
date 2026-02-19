@@ -2,20 +2,29 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftFinance",
+    name: "NuatisFinance",
     platforms: [
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "SwiftFinanceApp", targets: ["SwiftFinanceApp"])
+        .executable(
+            name: "NuatisFinanceApp",
+            targets: ["NuatisFinanceApp"]
+        )
     ],
     targets: [
         .executableTarget(
-            name: "SwiftFinanceApp",
-            path: "Sources/SwiftFinanceApp",
+            name: "NuatisFinanceApp",
+            path: "Sources/NuatisFinanceApp",
             resources: [
                 .copy("FinanceApp/Resources")
             ]
+        ),
+
+        .testTarget(
+            name: "NuatisFinanceTests",
+            dependencies: ["NuatisFinanceApp"],
+            path: "Tests/NuatisFinanceTests"
         )
     ]
 )
