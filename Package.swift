@@ -15,7 +15,7 @@ let package = Package(
     targets: [
         .executableTarget(
             name: "NuatisFinanceApp",
-            path: "Sources/NuatisFinanceApp",
+            path: "Sources/NuatisFinance",
             resources: [
                 .copy("FinanceApp/Resources")
             ]

@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:NuatisFinance}",
+            "name": "Debug NuatisFinanceApp",
+            "target": "NuatisFinanceApp",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug NuatisFinanceApp"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:NuatisFinance}",
+            "name": "Release NuatisFinanceApp",
+            "target": "NuatisFinanceApp",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release NuatisFinanceApp"
+        }
+    ]
+}

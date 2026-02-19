@@ -2,10 +2,10 @@ import Foundation
 import CoreData
 
 protocol ExpenseRepository {
-    func fetchExpenses() -> [Expense]
-    func createExpense(_ expense: Expense)
-    func updateExpense(_ expense: Expense)
-    func deleteExpense(id: UUID)
+    func fetchExpenses() throws -> [Expense]
+    func createExpense(_ expense: Expense) throws
+    func updateExpense(_ expense: Expense) throws
+    func deleteExpense(id: UUID) throws
 }
 
 struct CoreDataExpenseRepository: ExpenseRepository {
@@ -15,11 +15,11 @@ struct CoreDataExpenseRepository: ExpenseRepository {
         self.context = context
     }
 
-    func fetchExpenses() -> [Expense] {
+    func fetchExpenses() throws -> [Expense] {
         let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
         req.sortDescriptors = [NSSortDescriptor(key: "incurredAt", ascending: false)]
 
-        let results = (try? context.fetch(req)) ?? []
+        let results = try context.fetch(req)
         return results.map {
             Expense(
                 id: ($0.value(forKey: "id") as? UUID) ?? UUID(),
@@ -32,7 +32,7 @@ struct CoreDataExpenseRepository: ExpenseRepository {
         }
     }
 
-    func createExpense(_ expense: Expense) {
+    func createExpense(_ expense: Expense) throws {
         let entity = NSEntityDescription.entity(forEntityName: "ExpenseRecord", in: context)!
         let obj = NSManagedObject(entity: entity, insertInto: context)
 
@@ -43,15 +43,15 @@ struct CoreDataExpenseRepository: ExpenseRepository {
         obj.setValue(expense.incurredAt, forKey: "incurredAt")
         obj.setValue(expense.reimbursable, forKey: "reimbursable")
 
-        CoreDataStack.shared.saveIfNeeded()
+        try saveIfNeeded()
     }
 
-    func updateExpense(_ expense: Expense) {
+    func updateExpense(_ expense: Expense) throws {
         let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
         req.predicate = NSPredicate(format: "id == %@", expense.id as CVarArg)
         req.fetchLimit = 1
 
-        guard let obj = (try? context.fetch(req))?.first else { return }
+        guard let obj = try context.fetch(req).first else { return }
 
         obj.setValue(expense.vendorName, forKey: "vendorName")
         obj.setValue(expense.category, forKey: "category")
@@ -59,16 +59,23 @@ struct CoreDataExpenseRepository: ExpenseRepository {
         obj.setValue(expense.incurredAt, forKey: "incurredAt")
         obj.setValue(expense.reimbursable, forKey: "reimbursable")
 
-        CoreDataStack.shared.saveIfNeeded()
+        try saveIfNeeded()
     }
 
-    func deleteExpense(id: UUID) {
+    func deleteExpense(id: UUID) throws {
         let req = NSFetchRequest<NSManagedObject>(entityName: "ExpenseRecord")
         req.predicate = NSPredicate(format: "id == %@", id as CVarArg)
 
-        let results = (try? context.fetch(req)) ?? []
+        let results = try context.fetch(req)
         results.forEach { context.delete($0) }
 
-        CoreDataStack.shared.saveIfNeeded()
+        try saveIfNeeded()
+    }
+
+    // MARK: - Local save using injected context (critical for tests)
+
+    private func saveIfNeeded() throws {
+        guard context.hasChanges else { return }
+        try context.save()
     }
 }

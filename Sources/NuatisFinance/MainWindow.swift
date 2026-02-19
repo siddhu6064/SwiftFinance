@@ -3,7 +3,7 @@ import SwiftUI
 struct MainWindow: View {
     @State private var selection: AppSection = .dashboard
     @State private var searchText = ""
-    @State private var company = "SwiftFinance LLC"
+    @State private var company = "Nuatis LLC"
 
     var body: some View {
         HStack(spacing: 0) {
