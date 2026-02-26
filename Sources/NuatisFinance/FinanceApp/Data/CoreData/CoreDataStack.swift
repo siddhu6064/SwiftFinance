@@ -72,10 +72,11 @@ final class CoreDataStack {
         invoice.properties = [
             attribute("id", type: .UUIDAttributeType),
             attribute("number"),
-            attribute("customer"),
-            attribute("amount", type: .doubleAttributeType),
+            attribute("customerName"),
+            attribute("totalAmount", type: .decimalAttributeType),
             attribute("status"),
-            attribute("date", type: .dateAttributeType)
+            attribute("issueDate", type: .dateAttributeType),
+            attribute("dueDate", type: .dateAttributeType, optional: true)
         ]
 
         // ExpenseRecord
@@ -84,10 +85,11 @@ final class CoreDataStack {
         expense.managedObjectClassName = NSStringFromClass(NSManagedObject.self)
         expense.properties = [
             attribute("id", type: .UUIDAttributeType),
-            attribute("vendor"),
-            attribute("category"),
-            attribute("amount", type: .doubleAttributeType),
-            attribute("date", type: .dateAttributeType)
+            attribute("vendorName"),
+            attribute("categoryName"),
+            attribute("totalAmount", type: .decimalAttributeType),
+            attribute("expenseDate", type: .dateAttributeType),
+            attribute("notes", optional: true)
         ]
 
         // CustomerRecord
@@ -96,9 +98,13 @@ final class CoreDataStack {
         customer.managedObjectClassName = NSStringFromClass(NSManagedObject.self)
         customer.properties = [
             attribute("id", type: .UUIDAttributeType),
-            attribute("name"),
-            attribute("email"),
-            attribute("arBalance", type: .doubleAttributeType)
+            attribute("customerName"),
+            attribute("email", optional: true),
+            attribute("arBalance", type: .decimalAttributeType),
+            attribute("phone", optional: true),
+            attribute("email", optional: true),
+            attribute("createdAt", type: .dateAttributeType),
+            attribute("notes", optional: true)
         ]
 
         // VendorRecord
